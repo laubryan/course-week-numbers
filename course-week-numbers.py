@@ -1,5 +1,6 @@
 import datetime
 import os.path
+import json
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -128,7 +129,12 @@ def authenticate():
   # created automatically when the authorization flow completes for the first
   # time.
 	if os.path.exists("token.json"):
+		# Read cached token
 		creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+
+		# Check for token expiry
+		if creds.expired:
+			creds = None # Invalidate expired token so we can request a new one
 
   # If there are no (valid) credentials available, let the user log in.
 	if not creds or not creds.valid:
@@ -140,7 +146,7 @@ def authenticate():
 		)
 			creds = flow.run_local_server()
 
-	# Save the credentials for the next run
+		# Save the credentials for the next run
 		with open("token.json", "w") as token:
 			token.write(creds.to_json())
 	return creds
