@@ -13,3 +13,5 @@ Script prompts for:
 - Event color (as defined by Google Calendar)
 
 Requires setup of credentials via Google Cloud Console.
+
+A browser page will open if authentication is required, which will happen if you've never authenticated before, or if the saved token has expired.
