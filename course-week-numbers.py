@@ -129,12 +129,22 @@ def authenticate():
   # created automatically when the authorization flow completes for the first
   # time.
 	if os.path.exists("token.json"):
-		# Read cached token
-		creds = Credentials.from_authorized_user_file("token.json", SCOPES)
 
-		# Check for token expiry
-		if creds.expired:
-			creds = None # Invalidate expired token so we can request a new one
+		# Check if token is too old
+		if isTokenOld():
+
+			# Delete old token
+			os.remove("token.json")
+			creds = None
+
+		else:
+
+			# Read cached token
+			creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+
+			# Check for token expiry
+			if creds.expired:
+				creds = None # Invalidate expired token so we can request a new one
 
   # If there are no (valid) credentials available, let the user log in.
 	if not creds or not creds.valid:
@@ -201,6 +211,24 @@ def insert_event(service, event_date, event_title, event_body, event_tz, event_c
 
 	# Return event link
 	return event.get("htmlLink")
+
+#
+# Check if token is older than 14 days
+#
+def isTokenOld():
+
+	# Check if token.json exists
+	if os.path.exists("token.json"):
+
+		# Get token age in days
+		tokenModificationDate = os.path.getmtime("token.json")
+		tokenAgeDays = datetime.fromtimestamp(tokenModificationDate)
+
+		# Check if older than 14 days
+		if datetime.now() - tokenAgeDays > timedelta(days=14):
+			return True # Token is older than 14 days
+
+	return False
 
 #
 # Validate date format
